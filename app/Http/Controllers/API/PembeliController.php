@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\Kategori;
+use App\Models\Pembeli;
 use Illuminate\Http\Request;
 
 class PembeliController extends Controller
