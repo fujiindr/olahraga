@@ -51,6 +51,7 @@ class KategoriController extends Controller
             'message' => 'Data Kategori Berhasil Dibuat',
             'data' => $kategori,
         ]);
+        
     }
 
     public function show($id)

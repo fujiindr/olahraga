@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\Barang;
 use Illuminate\Http\Request;
+use App\Models\Barang;
+use App\Models\Kategori;
+use DB;
 
 class BarangController extends Controller
 {
@@ -13,17 +15,36 @@ class BarangController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+     public function kategori()
     {
-        $barang = Barang::all();
+        $kategori = Kategori::all();
         return response()->json([
-            'status' => true,
-            'code' => 200,
-            'message' => 'berhasil',
-            'data' => $barang,
-        ]);
+            'success' => true,
+            'message' => 'Data kategori',
+            'data' => $kategori,
+        ], 200);
     }
 
+
+    public function index()
+    {
+        // $artikel = Article::with('category')->get();
+        $barang = DB::table('barang')
+            ->join('kategori', 'barang.id_kategori', '=', 'id_kategori')
+            ->select('barang.nama_barang','kategori.nama_kategori','barang.stok','barang.deskripsi','barang.harga','barang.cover')
+            ->get();
+        return response()->json([
+            'success' => true,
+            'message' => 'data barang',
+            'data' => $barang,
+        ], 200);
+        // $barang = Barang::all();
+        // return response()->json([
+        //     'success' => true,
+        //     'message' => 'Data barang',
+        //     'data' => $barang,
+        // ], 200);
+    }
     /**
      * Show the form for creating a new resource.
      *
@@ -42,10 +63,7 @@ class BarangController extends Controller
      */
     public function store(Request $request)
     {
-        $image = $request->cover;
-        $name = $image->getClientOriginalName();
-
-        $barang = new Barang;
+        $barang = new Barang();
         $barang->id_kategori = $request->id_kategori;
         $barang->nama_barang = $request->nama_barang;
         // $barang->nama_kategori = $request->nama_kategori;
@@ -63,11 +81,10 @@ class BarangController extends Controller
         }
         $barang->save();
         return response()->json([
-            'status' => true,
-            'code' => 201,
-            'message' => 'Data Barang Berhasil Dibuat',
+            'success' => true,
+            'message' => 'Data Barang Berhasil dibuat',
             'data' => $barang,
-        ]);
+        ], 201);
     }
 
     /**
@@ -79,22 +96,11 @@ class BarangController extends Controller
     public function show($id)
     {
         $barang = Barang::findOrFail($id);
-        if ($barang) {
-            return response()->json([
-                'status' => true,
-                'code' => 200,
-                'message' => 'Show Data Barang',
-                'data' => $barang,
-            ]);
-
-        } else {
-            return response()->json([
-                'status' => false,
-                'code' => 404,
-                'message' => 'Data Barang Tidak Ditemukan',
-                'data' => [],
-            ]);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Show Data Barang',
+            'data' => $barang,
+        ], 200);
     }
 
     /**
@@ -117,13 +123,7 @@ class BarangController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if ($barang){
-        $image = $request->cover;
-        $name = $image->getClientOriginalName();
-
-        $barang = new Barang;
         $barang = Barang::findOrFail($id);
-        // $kategori = Kategori::all();
         $barang->id_kategori = $request->id_kategori;
         $barang->nama_barang = $request->nama_barang;
         // $barang->nama_kategori = $request->nama_kategori;
@@ -140,22 +140,12 @@ class BarangController extends Controller
             $barang->cover = $name;
         }
         $barang->save();
+        $barang->save();
         return response()->json([
-            'status' => true,
-            'code' => 201,
-            'message' => 'Data User Berhasil Dibuat',
+            'success' => true,
+            'message' => 'Data Barang Berhasil diedit',
             'data' => $barang,
-        ]);
-        }
-        else {
-            return response()->json([
-                'status' => false,
-                'code' => 404,
-                'message' => 'Data User Tidak Ditemukan',
-                'data' => [],
-            ]);
-        }
-
+        ], 201);
     }
 
     /**
@@ -166,23 +156,12 @@ class BarangController extends Controller
      */
     public function destroy($id)
     {
-        $barang = Barang::find($id);
-        if ($barang) {
-            $barang->delete();
-            return response()->json([
-                'status' => true,
-                'code' => 200,
-                'message' => 'Data barang Berhasil Di hapus',
-                'data' => $barang,
-            ]);
-
-        } else {
-            return response()->json([
-                'status' => false,
-                'code' => 404,
-                'message' => 'Data barang Tidak Ditemukan',
-                'data' => [],
-            ]);
-        }
+        $barang = Barang::findOrFail($id);
+        $barang->delete();
+        return response()->json([
+            'success' => true,
+            'message' => 'Data Barang Berhasil dihapus',
+            'data' => $barang,
+        ], 200);
     }
 }

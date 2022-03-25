@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Models\Transaksi;
 use Illuminate\Http\Request;
+use App\Models\Transaksi;
+use App\Models\Barang;
+use App\Models\Pembeli;
+use DB;
 
 class TransaksiController extends Controller
 {
@@ -13,19 +16,47 @@ class TransaksiController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+     public function barang()
     {
-        $transaksi = Transaksi::With('pembeli', 'barang')->get();
-        // $barang = Barang::all();
-        // $pembeli = Pembeli::all();
+        $barang = Barang::all();
         return response()->json([
-            'status' => true,
-            'code' => 200,
-            'message' => 'berhasil',
-            'data' => $transaksi,
-        ]);
+            'success' => true,
+            'message' => 'Data barang',
+            'data' => $barang,
+        ], 200);
     }
 
+    public function pembeli()
+    {
+        $pembeli = Pembeli::all();
+        return response()->json([
+            'success' => true,
+            'message' => 'Data pembeli',
+            'data' => $pembeli,
+        ], 200);
+    }
+
+
+    public function index()
+    {
+        // $artikel = Article::with('category')->get();
+        $transaksi = DB::table('transaksi')
+            ->join('barang', 'transaksi.id_barang', '=', 'id_barang')
+            ->join('pembeli', 'transaksi.id_pembeli', '=', 'id_pembeli')
+            ->select('pembeli.nama_pembeli', 'barang.nama_barang', 'transaksi.tanggal_beli', 'transaksi.harga', 'transaksi.jumlah', 'transaksi.total')
+            ->get();
+        return response()->json([
+            'success' => true,
+            'message' => 'data transaksi',
+            'data' => $transaksi,
+        ], 200);
+        // $barang = Barang::all();
+        // return response()->json([
+        //     'success' => true,
+        //     'message' => 'Data barang',
+        //     'data' => $barang,
+        // ], 200);
+    }
     /**
      * Show the form for creating a new resource.
      *
@@ -75,11 +106,10 @@ class TransaksiController extends Controller
         $transaksi->total = $price->harga * $request->jumlah;
         $transaksi->save();
         return response()->json([
-            'status' => true,
-            'code' => 201,
-            'message' => 'Data Transaksi Berhasil Dibuat',
+            'success' => true,
+            'message' => 'Data Transaksi Berhasil dibuat',
             'data' => $transaksi,
-        ]);
+        ], 201);
     }
 
     /**
@@ -91,22 +121,11 @@ class TransaksiController extends Controller
     public function show($id)
     {
         $transaksi = Transaksi::findOrFail($id);
-        if ($transaksi) {
-            return response()->json([
-                'status' => true,
-                'code' => 200,
-                'message' => 'Show Data Transaksi',
-                'data' => $transaksi,
-            ]);
-
-        } else {
-            return response()->json([
-                'status' => false,
-                'code' => 404,
-                'message' => 'Data Transaksi Tidak Ditemukan',
-                'data' => [],
-            ]);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Show Data Transaksi',
+            'data' => $transaksi,
+        ], 200);
     }
 
     /**
@@ -131,7 +150,6 @@ class TransaksiController extends Controller
     {
         $transaksi = new Transaksi;
         $transaksi = Transaksi::findOrfail($id);
-        if ($transaksi){
         $transaksi->id_pembeli = $request->id_pembeli;
         $transaksi->id_barang = $request->id_barang;
         $sisa_stok = Barang::findOrfail($request->id_barang);
@@ -162,21 +180,11 @@ class TransaksiController extends Controller
         $transaksi->harga = $price->harga;
         $transaksi->total = $price->harga * $request->jumlah;
         $transaksi->save();
-            return response()->json([
-                'status' => true,
-                'code' => 201,
-                'message' => 'Data User Berhasil Dibuat',
-                'data' => $transaksi,
-            ]);
-        }
-        else {
-            return response()->json([
-                'status' => false,
-                'code' => 404,
-                'message' => 'Data User Tidak Ditemukan',
-                'data' => [],
-            ]);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Data Transaksi Berhasil diedit',
+            'data' => $transaksi,
+        ], 201);
     }
 
     /**
@@ -188,22 +196,11 @@ class TransaksiController extends Controller
     public function destroy($id)
     {
         $transaksi = Transaksi::findOrFail($id);
-        if ($transaksi) {
-            $transaksi->delete();
-            return response()->json([
-                'status' => true,
-                'code' => 200,
-                'message' => 'Data Transaksi Berhasil Di hapus',
-                'data' => $transaksi,
-            ]);
-
-        } else {
-            return response()->json([
-                'status' => false,
-                'code' => 404,
-                'message' => 'Data Trasaksi Tidak Ditemukan',
-                'data' => [],
-            ]);
-        }
+        $transaksi->delete();
+        return response()->json([
+            'success' => true,
+            'message' => 'Data Transaksi Berhasil dihapus',
+            'data' => $transaksi,
+        ], 200);
     }
 }
